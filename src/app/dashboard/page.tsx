@@ -1,11 +1,11 @@
 'use client';
 
 import { theme } from '@/lib/theme';
-import Header from '@/components/Header';
 import Card from '@/components/ui/Card';
 import { useAuth } from '@/hooks/useAuth';
 import { redirect } from 'next/navigation';
 import { useEffect } from 'react';
+import Header from '@/components/Header';
 
 export default function Dashboard() {
   const { data: user, isLoading, error } = useAuth();
@@ -27,7 +27,7 @@ export default function Dashboard() {
   if (!user) {
     return null;
   }
-console.log(user)
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: theme.colors.background.primary }}>
       <Header user={user} />
@@ -35,7 +35,7 @@ console.log(user)
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold" style={{ color: theme.colors.text.primary }}>
-            Welcome back, {user.user_metadata.name || user.email || 'User'}!
+            Welcome back, {user.name || user.email || 'User'}!
           </h1>
           <p className="mt-2" style={{ color: theme.colors.text.secondary }}>
             Here's what's happening with your social media posts today.
