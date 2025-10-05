@@ -1,98 +1,155 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useAuthActions } from '@/hooks/useAuthActions';
+import { theme } from '@/lib/theme';
+import Button from './ui/Button';
 
-interface User {
+export interface User {
   id: string;
-  email?: string;
-  name?: string;
+  email?: string | undefined;
+  name?: string | undefined;
 }
 
-interface HeaderProps {
+export interface HeaderProps {
   user?: User | null;
   showAuth?: boolean;
+  onSignOut?: () => void;
+  isLoading?: boolean;
+  className?: string;
 }
 
-export default function Header({ user: propUser, showAuth = false }: HeaderProps = {}) {
-  const router = useRouter();
-  const { data: user, isLoading } = useAuth();
+const Header: React.FC<HeaderProps> = ({ 
+  user: propUser, 
+  showAuth = true, 
+  onSignOut,
+  isLoading: propIsLoading,
+  className = ''
+}) => {
+  const { data: user, isLoading: authIsLoading } = useAuth();
+  const { signOut, isSigningOut } = useAuthActions();
   
-  // Use prop user if provided, otherwise use query data
-  const currentUser = propUser || user;
+  const currentUser = propUser ?? user;
+  const isLoading = propIsLoading ?? authIsLoading;
 
-  const handleSignOut = async () => {
-    try {
-      await fetch('/api/signout', { method: 'POST' });
-      router.push('/');
-    } catch (error) {
-      console.error('Sign out failed:', error);
+  const handleSignOut = () => {
+    if (onSignOut) {
+      onSignOut();
+      return;
     }
+    signOut();
+  };
+
+  const headerStyles: React.CSSProperties = {
+    backgroundColor: theme.colors.background.secondary,
+    borderBottom: `1px solid ${theme.colors.border.primary}`,
+    boxShadow: theme.shadows.sm,
+  };
+
+  const navStyles: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    maxWidth: '1280px',
+    margin: '0 auto',
+    padding: `0 ${theme.spacing.lg}`,
+    height: '64px',
+  };
+
+  const logoStyles: React.CSSProperties = {
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: theme.colors.text.primary,
+    textDecoration: 'none',
+  };
+
+  const navLinksStyles: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.lg,
+  };
+
+  const userInfoStyles: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    color: theme.colors.text.secondary,
+    fontSize: theme.typography.fontSize.sm,
   };
 
   if (isLoading) {
     return (
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Link href="/" className="text-xl font-bold text-gray-900">
-                Orchestrator
-              </Link>
+      <header style={headerStyles} className={className}>
+        <nav style={navStyles}>
+          <Link href="/" style={logoStyles}>
+            Orchestrator
+          </Link>
+          <div style={navLinksStyles}>
+            <div 
+              style={{
+                ...userInfoStyles,
+                backgroundColor: theme.colors.gray[200],
+                borderRadius: theme.radius.md,
+                padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+                animation: 'pulse 2s infinite',
+              }}
+            >
+              Loading...
             </div>
-            <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
           </div>
-        </div>
+        </nav>
       </header>
     );
   }
 
   return (
-    <header className="bg-white shadow-sm border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-gray-900">
-              Orchestrator
-            </Link>
-          </div>
-          
-          <nav className="flex items-center space-x-4">
-            {currentUser ? (
-              <>
-                <Link
-                  href="/dashboard"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
+    <header style={headerStyles} className={className}>
+      <nav style={navStyles}>
+        <Link href="/" style={logoStyles}>
+          Orchestrator
+        </Link>
+
+        <div style={navLinksStyles}>
+          {currentUser ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="ghost" size="sm">
                   Dashboard
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : showAuth ? (
+                </Button>
+              </Link>
+              
+              <Button
+                variant="error"
+                size="sm"
+                onClick={handleSignOut}
+                loading={isSigningOut}
+                disabled={isSigningOut}
+              >
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            showAuth && (
               <>
-                <Link
-                  href="/login"
-                  className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Sign in
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">
+                    Sign In
+                  </Button>
                 </Link>
-                <Link
-                  href="/signup"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Sign up
+                <Link href="/signup">
+                  <Button variant="primary" size="sm">
+                    Sign Up
+                  </Button>
                 </Link>
               </>
-            ) : null}
-          </nav>
+            )
+          )}
         </div>
-      </div>
+      </nav>
     </header>
   );
-}
+};
+
+export default Header;
