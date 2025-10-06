@@ -48,8 +48,22 @@ export default function Dashboard() {
             <h2 className="text-xl font-bold" style={{ color: theme.colors.text.primary }}>
               Your Social Media Accounts
             </h2>
-
-<p className="text-sm text-gray-500">Add accounts to get started</p>
+            <p className="text-sm text-gray-500">Add accounts to get started</p>
+            <div className="mt-4 space-x-3">
+              <a
+                className="inline-flex items-center rounded-md bg-black px-4 py-2 text-white text-sm"
+                href="/api/oauth/twitter/start"
+              >
+                Connect Twitter
+              </a>
+              <a
+                className="inline-flex items-center rounded-md bg-gray-800 px-4 py-2 text-white text-sm opacity-70 cursor-not-allowed"
+                aria-disabled
+                href="/api/oauth/threads/start"
+              >
+                Connect Threads (coming soon)
+              </a>
+            </div>
           </Card>
         </div>
       </div>
