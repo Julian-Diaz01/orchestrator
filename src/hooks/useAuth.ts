@@ -25,7 +25,7 @@ export function useAuth() {
   const transformedUser: User | null = data ? {
     id: data.id,
     email: data.email || undefined,
-    name: data.name || data.user_metadata?.name || data.email?.split('@')[0] || undefined,
+    name: data.name || data.email?.split('@')[0] || undefined,
   } : null;
 
   return {
